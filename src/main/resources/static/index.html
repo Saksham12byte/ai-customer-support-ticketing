@@ -1,0 +1,575 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SkillWallet | AI-Powered Customer Support Ticketing System</title>
+  <!-- Google Fonts: Inter -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+  <!-- Chart.js CDN for Analytics Dashboard -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.2/dist/chart.umd.min.js"></script>
+  <!-- Custom Stylesheet -->
+  <link rel="stylesheet" href="css/styles.css">
+</head>
+<body>
+  <!-- Toast Notification Container -->
+  <div id="toastContainer" class="toast-container" aria-live="polite"></div>
+
+  <!-- Header Navigation -->
+  <header class="app-header">
+    <div class="header-container">
+      <div class="brand">
+        <div class="brand-logo">
+          <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M21 11.5a8.38 8.38 0 0 1-.9 3.8 8.5 8.5 0 0 1-7.6 4.7 8.38 8.38 0 0 1-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 0 1-.9-3.8 8.5 8.5 0 0 1 4.7-7.6 8.38 8.38 0 0 1 3.8-.9h.5a8.48 8.48 0 0 1 8 8v.5z"></path>
+          </svg>
+        </div>
+        <div>
+          <h1 class="brand-title">SkillWallet SupportDesk</h1>
+          <p class="brand-subtitle">AI-Powered Capstone Ticketing System</p>
+        </div>
+      </div>
+
+      <div class="header-center">
+        <div id="aiStatusBadge" class="ai-status-badge ai-status-checking">
+          <span class="ai-dot"></span>
+          <span id="aiStatusText">AI Mode: Initializing...</span>
+        </div>
+      </div>
+
+      <div class="header-actions">
+        <div class="user-pill" title="Demo Agent Persona">
+          <div class="avatar">AR</div>
+          <div class="user-info">
+            <span class="user-name">Alex Rivera</span>
+            <span class="user-role">Support Specialist</span>
+          </div>
+        </div>
+        <button id="openNewTicketModalBtn" class="btn btn-primary">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+            <line x1="12" y1="5" x2="12" y2="19"></line>
+            <line x1="5" y1="12" x2="19" y2="12"></line>
+          </svg>
+          New Ticket
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Main Application Wrapper -->
+  <main class="app-main">
+    <!-- View Navigation Tabs -->
+    <nav class="view-tabs" role="tablist">
+      <button class="tab-btn active" data-view="dashboardView" role="tab" aria-selected="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="3" width="7" height="9"></rect>
+          <rect x="14" y="3" width="7" height="5"></rect>
+          <rect x="14" y="12" width="7" height="9"></rect>
+          <rect x="3" y="16" width="7" height="5"></rect>
+        </svg>
+        Analytics Dashboard
+      </button>
+      <button class="tab-btn" data-view="kanbanView" role="tab" aria-selected="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="18" y1="3" x2="18" y2="21"></line>
+          <line x1="6" y1="3" x2="6" y2="21"></line>
+          <line x1="12" y1="3" x2="12" y2="21"></line>
+        </svg>
+        Kanban Workflow
+      </button>
+      <button class="tab-btn" data-view="listView" role="tab" aria-selected="false">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <line x1="8" y1="6" x2="21" y2="6"></line>
+          <line x1="8" y1="12" x2="21" y2="12"></line>
+          <line x1="8" y1="18" x2="21" y2="18"></line>
+          <line x1="3" y1="6" x2="3.01" y2="6"></line>
+          <line x1="3" y1="12" x2="3.01" y2="12"></line>
+          <line x1="3" y1="18" x2="3.01" y2="18"></line>
+        </svg>
+        All Tickets
+      </button>
+    </nav>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 1: DASHBOARD & METRICS                             -->
+    <!-- ======================================================== -->
+    <section id="dashboardView" class="view-panel active">
+      <!-- Top Metrics Row -->
+      <div class="metrics-grid">
+        <div class="metric-card">
+          <div class="metric-icon total-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Total Tickets</span>
+            <span id="metricTotal" class="metric-value">--</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon open-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Active / Open</span>
+            <span id="metricOpen" class="metric-value">--</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon pending-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Waiting for Customer</span>
+            <span id="metricPending" class="metric-value">--</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon resolved-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Resolved / Closed</span>
+            <span id="metricResolved" class="metric-value">--</span>
+          </div>
+        </div>
+
+        <div class="metric-card">
+          <div class="metric-icon critical-icon">
+            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line></svg>
+          </div>
+          <div class="metric-body">
+            <span class="metric-label">Critical Issues</span>
+            <span id="metricCritical" class="metric-value">--</span>
+          </div>
+        </div>
+      </div>
+
+      <!-- Charts Row -->
+      <div class="charts-grid">
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Workflow Status Breakdown</h3>
+            <span class="badge badge-subtle">Real-Time</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="statusChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card">
+          <div class="chart-header">
+            <h3>Tickets by Priority Level</h3>
+            <span class="badge badge-subtle">SLA Priority</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="priorityChart"></canvas>
+          </div>
+        </div>
+
+        <div class="chart-card full-width">
+          <div class="chart-header">
+            <h3>Support Category Volume</h3>
+            <span class="badge badge-subtle">Distribution</span>
+          </div>
+          <div class="chart-container">
+            <canvas id="categoryChart"></canvas>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 2: KANBAN WORKFLOW BOARD                            -->
+    <!-- ======================================================== -->
+    <section id="kanbanView" class="view-panel">
+      <div class="kanban-info-bar">
+        <p><strong>Status Pipeline:</strong> Drag cards or use the quick-action arrows on each ticket to advance it through the lifecycle.</p>
+        <button id="refreshKanbanBtn" class="btn btn-secondary btn-sm">Refresh Board</button>
+      </div>
+
+      <div class="kanban-board">
+        <!-- Column 1: New -->
+        <div class="kanban-column" data-status="NEW">
+          <div class="kanban-header">
+            <div class="kanban-title">
+              <span class="status-indicator status-new"></span>
+              <h4>New</h4>
+            </div>
+            <span class="kanban-count" id="count-NEW">0</span>
+          </div>
+          <div class="kanban-dropzone" id="kanban-NEW" ondragover="app.handleDragOver(event)" ondrop="app.handleDrop(event, 'NEW')"></div>
+        </div>
+
+        <!-- Column 2: In Progress -->
+        <div class="kanban-column" data-status="IN_PROGRESS">
+          <div class="kanban-header">
+            <div class="kanban-title">
+              <span class="status-indicator status-progress"></span>
+              <h4>In Progress</h4>
+            </div>
+            <span class="kanban-count" id="count-IN_PROGRESS">0</span>
+          </div>
+          <div class="kanban-dropzone" id="kanban-IN_PROGRESS" ondragover="app.handleDragOver(event)" ondrop="app.handleDrop(event, 'IN_PROGRESS')"></div>
+        </div>
+
+        <!-- Column 3: Waiting for Customer -->
+        <div class="kanban-column" data-status="WAITING_FOR_CUSTOMER">
+          <div class="kanban-header">
+            <div class="kanban-title">
+              <span class="status-indicator status-waiting"></span>
+              <h4>Waiting for Customer</h4>
+            </div>
+            <span class="kanban-count" id="count-WAITING_FOR_CUSTOMER">0</span>
+          </div>
+          <div class="kanban-dropzone" id="kanban-WAITING_FOR_CUSTOMER" ondragover="app.handleDragOver(event)" ondrop="app.handleDrop(event, 'WAITING_FOR_CUSTOMER')"></div>
+        </div>
+
+        <!-- Column 4: Resolved -->
+        <div class="kanban-column" data-status="RESOLVED">
+          <div class="kanban-header">
+            <div class="kanban-title">
+              <span class="status-indicator status-resolved"></span>
+              <h4>Resolved</h4>
+            </div>
+            <span class="kanban-count" id="count-RESOLVED">0</span>
+          </div>
+          <div class="kanban-dropzone" id="kanban-RESOLVED" ondragover="app.handleDragOver(event)" ondrop="app.handleDrop(event, 'RESOLVED')"></div>
+        </div>
+
+        <!-- Column 5: Closed -->
+        <div class="kanban-column" data-status="CLOSED">
+          <div class="kanban-header">
+            <div class="kanban-title">
+              <span class="status-indicator status-closed"></span>
+              <h4>Closed</h4>
+            </div>
+            <span class="kanban-count" id="count-CLOSED">0</span>
+          </div>
+          <div class="kanban-dropzone" id="kanban-CLOSED" ondragover="app.handleDragOver(event)" ondrop="app.handleDrop(event, 'CLOSED')"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ======================================================== -->
+    <!-- VIEW 3: TICKET LIST WITH FILTERS & SEARCH                -->
+    <!-- ======================================================== -->
+    <section id="listView" class="view-panel">
+      <!-- Filter Toolbar -->
+      <div class="filter-toolbar">
+        <div class="search-box">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"></circle><line x1="21" y1="21" x2="16.65" y2="16.65"></line></svg>
+          <input type="text" id="searchInput" placeholder="Search by ticket #, subject, customer, or description...">
+          <button id="clearSearchBtn" class="clear-btn" style="display:none;">&times;</button>
+        </div>
+
+        <div class="filter-group">
+          <select id="filterStatus" class="select-control">
+            <option value="">All Statuses</option>
+            <option value="NEW">New</option>
+            <option value="IN_PROGRESS">In Progress</option>
+            <option value="WAITING_FOR_CUSTOMER">Waiting for Customer</option>
+            <option value="RESOLVED">Resolved</option>
+            <option value="CLOSED">Closed</option>
+          </select>
+
+          <select id="filterPriority" class="select-control">
+            <option value="">All Priorities</option>
+            <option value="LOW">Low</option>
+            <option value="MEDIUM">Medium</option>
+            <option value="HIGH">High</option>
+            <option value="CRITICAL">Critical</option>
+          </select>
+
+          <select id="filterCategory" class="select-control">
+            <option value="">All Categories</option>
+            <option value="TECHNICAL">Technical Support</option>
+            <option value="BILLING">Billing & Invoices</option>
+            <option value="ACCOUNT_ACCESS">Account & Login</option>
+            <option value="FEATURE_REQUEST">Feature Request</option>
+            <option value="GENERAL_INQUIRY">General Inquiry</option>
+          </select>
+
+          <select id="filterSort" class="select-control">
+            <option value="createdAt-desc">Newest First</option>
+            <option value="createdAt-asc">Oldest First</option>
+            <option value="priority-desc">Priority (High to Low)</option>
+            <option value="subject-asc">Subject (A-Z)</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Tickets Table Container -->
+      <div class="table-container">
+        <table class="tickets-table">
+          <thead>
+            <tr>
+              <th>Ticket #</th>
+              <th>Customer</th>
+              <th>Subject</th>
+              <th>Category</th>
+              <th>Priority</th>
+              <th>Status</th>
+              <th>Agent</th>
+              <th>Created</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody id="ticketsTableBody">
+            <tr>
+              <td colspan="9" class="loading-cell">Loading tickets...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </section>
+  </main>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 1: CREATE NEW TICKET MODAL                         -->
+  <!-- ======================================================== -->
+  <div id="newTicketModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M12 20h9"></path><path d="M16.5 3.5a2.121 2.121 0 0 1 3 3L7 19l-4 1 1-4L16.5 3.5z"></path></svg>
+          </div>
+          <div>
+            <h3>Submit Customer Support Ticket</h3>
+            <p>Fill out the details below. Click <strong>AI Auto-Classify</strong> to predict category & priority.</p>
+          </div>
+        </div>
+        <button class="close-modal-btn" onclick="app.closeModal('newTicketModal')">&times;</button>
+      </div>
+
+      <form id="newTicketForm" onsubmit="app.handleCreateTicket(event)">
+        <div class="modal-body">
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="ticketCustomerName">Customer Name <span class="required">*</span></label>
+              <input type="text" id="ticketCustomerName" placeholder="e.g. Maya Lin" required>
+            </div>
+            <div class="form-group flex-1">
+              <label for="ticketCustomerEmail">Customer Email <span class="required">*</span></label>
+              <input type="email" id="ticketCustomerEmail" placeholder="e.g. maya@example.com" required>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="ticketSubject">Subject <span class="required">*</span></label>
+            <input type="text" id="ticketSubject" placeholder="Brief summary of the issue (e.g. Payment Gateway failing with 500 error)" required minlength="5">
+          </div>
+
+          <div class="form-group">
+            <div class="label-with-action">
+              <label for="ticketDescription">Description <span class="required">*</span></label>
+              <button type="button" id="aiAutoClassifyBtn" class="btn btn-ai-sparkle btn-sm" onclick="app.handleAutoClassify()">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                AI Auto-Classify
+              </button>
+            </div>
+            <textarea id="ticketDescription" rows="4" placeholder="Detailed explanation of the issue, symptoms, steps to reproduce..." required minlength="10"></textarea>
+          </div>
+
+          <!-- AI Auto-Classify Preview Box -->
+          <div id="aiClassificationBanner" class="ai-banner" style="display:none;">
+            <div class="ai-banner-header">
+              <span class="ai-banner-badge">AI Assistant Analysis</span>
+              <span id="aiConfidenceBadge" class="confidence-badge">94% Confidence</span>
+            </div>
+            <p id="aiReasoningText" class="ai-reasoning"></p>
+          </div>
+
+          <div class="form-row">
+            <div class="form-group flex-1">
+              <label for="ticketCategory">Category <span class="required">*</span></label>
+              <select id="ticketCategory" required>
+                <option value="TECHNICAL">Technical Support</option>
+                <option value="BILLING">Billing & Invoices</option>
+                <option value="ACCOUNT_ACCESS">Account & Login Access</option>
+                <option value="FEATURE_REQUEST">Feature Request</option>
+                <option value="GENERAL_INQUIRY">General Inquiry</option>
+              </select>
+            </div>
+
+            <div class="form-group flex-1">
+              <label for="ticketPriority">Priority <span class="required">*</span></label>
+              <select id="ticketPriority" required>
+                <option value="LOW">Low</option>
+                <option value="MEDIUM" selected>Medium</option>
+                <option value="HIGH">High</option>
+                <option value="CRITICAL">Critical</option>
+              </select>
+            </div>
+          </div>
+        </div>
+
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" onclick="app.closeModal('newTicketModal')">Cancel</button>
+          <button type="submit" id="submitTicketBtn" class="btn btn-primary">Create Ticket</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- ======================================================== -->
+  <!-- MODAL 2: TICKET DETAILS & RESOLUTION MODAL               -->
+  <!-- ======================================================== -->
+  <div id="ticketDetailModal" class="modal-overlay" style="display:none;">
+    <div class="modal-card modal-large">
+      <div class="modal-header">
+        <div class="modal-title-wrap">
+          <div class="modal-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line><polyline points="10 9 9 9 8 9"></polyline></svg>
+          </div>
+          <div>
+            <div class="modal-header-badges">
+              <span id="detailTicketNumber" class="ticket-tag">TCK-0000</span>
+              <span id="detailStatusBadge" class="badge">Status</span>
+              <span id="detailPriorityBadge" class="badge">Priority</span>
+            </div>
+            <h3 id="detailSubject">Ticket Subject</h3>
+          </div>
+        </div>
+        <button class="close-modal-btn" onclick="app.closeModal('ticketDetailModal')">&times;</button>
+      </div>
+
+      <div class="modal-body modal-split">
+        <!-- Left Column: Details & Thread -->
+        <div class="modal-left-pane">
+          <!-- Customer & Meta Block -->
+          <div class="ticket-meta-box">
+            <div class="meta-item">
+              <span class="meta-label">Customer</span>
+              <span id="detailCustomerName" class="meta-value">Customer Name</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Email</span>
+              <span id="detailCustomerEmail" class="meta-value">customer@example.com</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Category</span>
+              <span id="detailCategory" class="meta-value">Technical Support</span>
+            </div>
+            <div class="meta-item">
+              <span class="meta-label">Created At</span>
+              <span id="detailCreatedAt" class="meta-value">--</span>
+            </div>
+          </div>
+
+          <!-- Description Box -->
+          <div class="ticket-desc-box">
+            <h4>Description</h4>
+            <p id="detailDescription" class="desc-text"></p>
+          </div>
+
+          <!-- AI Suggested Response Box -->
+          <div class="ai-draft-section">
+            <div class="ai-draft-header">
+              <div class="ai-draft-title">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"><polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2"></polygon></svg>
+                <span>AI Response Assistant</span>
+              </div>
+              <button id="generateAiDraftBtn" class="btn btn-ai-sparkle btn-sm" onclick="app.generateAiResponseDraft()">
+                Generate AI Reply
+              </button>
+            </div>
+            <div id="aiDraftContainer" style="display:none;" class="ai-draft-body">
+              <div class="ai-draft-preview" id="aiDraftText"></div>
+              <div class="ai-draft-actions">
+                <button type="button" class="btn btn-secondary btn-sm" onclick="app.copyAiDraftToReply()">
+                  Copy into Reply Box
+                </button>
+              </div>
+            </div>
+          </div>
+
+          <!-- Conversation Thread -->
+          <div class="conversation-section">
+            <h4>Activity & Conversation Thread</h4>
+            <div id="commentsTimeline" class="comments-timeline">
+              <!-- Dynamically populated comments -->
+            </div>
+
+            <!-- Post New Comment Box -->
+            <form id="addCommentForm" onsubmit="app.handleAddComment(event)" class="add-comment-box">
+              <div class="comment-input-wrap">
+                <textarea id="commentMessageInput" rows="3" placeholder="Type a response to the customer or internal note..." required></textarea>
+                <div class="comment-actions-bar">
+                  <label class="internal-note-toggle">
+                    <input type="checkbox" id="isInternalNoteCheckbox">
+                    <span>Internal Agent Note (Not visible to customer)</span>
+                  </label>
+                  <button type="submit" id="submitCommentBtn" class="btn btn-primary btn-sm">Send Reply</button>
+                </div>
+              </div>
+            </form>
+          </div>
+        </div>
+
+        <!-- Right Column: Ticket Controls & Resolution Notes -->
+        <div class="modal-right-pane">
+          <div class="control-card">
+            <h4>Ticket Controls</h4>
+            <form id="updateTicketControlsForm" onsubmit="app.handleUpdateControls(event)">
+              <div class="form-group">
+                <label for="detailStatusSelect">Status</label>
+                <select id="detailStatusSelect">
+                  <option value="NEW">New</option>
+                  <option value="IN_PROGRESS">In Progress</option>
+                  <option value="WAITING_FOR_CUSTOMER">Waiting for Customer</option>
+                  <option value="RESOLVED">Resolved</option>
+                  <option value="CLOSED">Closed</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="detailPrioritySelect">Priority</label>
+                <select id="detailPrioritySelect">
+                  <option value="LOW">Low</option>
+                  <option value="MEDIUM">Medium</option>
+                  <option value="HIGH">High</option>
+                  <option value="CRITICAL">Critical</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="detailAgentSelect">Assigned Agent</label>
+                <select id="detailAgentSelect">
+                  <option value="Unassigned">Unassigned</option>
+                  <option value="Alex Rivera">Alex Rivera (Support Specialist)</option>
+                  <option value="Sarah Chen">Sarah Chen (Senior Agent)</option>
+                  <option value="Dev Team Lead">Dev Team Lead (Engineering)</option>
+                </select>
+              </div>
+
+              <div class="form-group">
+                <label for="detailResolutionNotes">Resolution Notes</label>
+                <textarea id="detailResolutionNotes" rows="4" placeholder="Document the root cause and solution before marking Resolved or Closed..."></textarea>
+              </div>
+
+              <button type="submit" id="saveControlsBtn" class="btn btn-primary btn-block">
+                Save Ticket Changes
+              </button>
+            </form>
+          </div>
+
+          <!-- Capstone Tips Card -->
+          <div class="info-card">
+            <h5>💡 Capstone Viva Tip</h5>
+            <p>Demonstrating status progression from <strong>New</strong> to <strong>In Progress</strong> and <strong>Resolved</strong> records an automatic audit entry in the activity thread.</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Custom App JavaScript -->
+  <script src="js/app.js"></script>
+</body>
+</html>
